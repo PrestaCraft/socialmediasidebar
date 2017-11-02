@@ -1,0 +1,16 @@
+.pc-social-icon {
+    height:50px;
+    font-size:30px;
+    text-align:center;
+    padding-top:10px;
+}
+
+.pc-social-sidebar {
+    position:fixed;
+    left:0;
+    top:20%;
+    z-index:9999;
+    width:50px;
+}
+
+.icon-behance:before{content:"\f1b4"}
