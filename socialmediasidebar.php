@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * This software is provided "as is" without warranty of any kind.
  *
  * Made by PrestaCraft
@@ -7,8 +7,7 @@
  * Visit my website (http://prestacraft.com) for future updates, new articles and other awesome modules.
  *
  * @author     PrestaCraft
- * @copyright  2015-2017 PrestaCraft
- * @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * @copyright  PrestaCraft
  */
 
 if (!defined('_PS_VERSION_')) {
@@ -22,7 +21,7 @@ class SocialmediaSidebar extends Module
     {
         $this->name = 'socialmediasidebar';
         $this->tab = 'front_office_features';
-        $this->version = '1.1.0';
+        $this->version = '1.2.0';
         $this->author = 'PrestaCraft';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -52,7 +51,8 @@ class SocialmediaSidebar extends Module
             !Configuration::updateValue('PC_SOCIAL_MONOCOLORED_1', '#FF2310') ||
             !Configuration::updateValue('PC_SOCIAL_MONOCOLORED_2', '#F1F1F1') ||
             !Configuration::updateValue('PC_SOCIAL_INVERSE', '0') ||
-            !Configuration::updateValue('PC_SOCIAL_NEW_WINDOW', '1')
+            !Configuration::updateValue('PC_SOCIAL_NEW_WINDOW', '1') ||
+            !Configuration::updateValue('PC_HIDE_MOBILE', '0')
         ) {
             return false;
         }
@@ -82,7 +82,7 @@ class SocialmediaSidebar extends Module
         $count = Db::getInstance()->getValue('SELECT count(*) FROM `' . _DB_PREFIX_ . 'social_media_sidebar`');
 
         // Dummy check if table has already some rows
-        if ($count < 6) {
+        if ($count < 12) {
             if (!Db::getInstance()->execute('TRUNCATE TABLE `' . _DB_PREFIX_ . 'social_media_sidebar`')) {
                 return false;
             }
@@ -206,6 +206,96 @@ class SocialmediaSidebar extends Module
                 'nr' => '8'
                 )
             );
+
+            Db::getInstance()->insert(
+                'social_media_sidebar',
+                array(
+                    'social_name' => 'Instagram',
+                    'social_class' => 'icon-instagram',
+                    'field_name' => 'instagram',
+                    'background' => '#EB178F',
+                    'bg_default' => '#EB178F',
+                    'icon_color' => '#FFFFFF',
+                    'url' => '',
+                    'enabled' => '0',
+                    'nr' => '9'
+                )
+            );
+
+            Db::getInstance()->insert(
+                'social_media_sidebar',
+                array(
+                    'social_name' => 'VK',
+                    'social_class' => 'icon-vk',
+                    'field_name' => 'xing',
+                    'background' => '#5181B8',
+                    'bg_default' => '#5181B8',
+                    'icon_color' => '#FFFFFF',
+                    'url' => '',
+                    'enabled' => '0',
+                    'nr' => '10'
+                )
+            );
+
+            Db::getInstance()->insert(
+                'social_media_sidebar',
+                array(
+                    'social_name' => 'Tumblr',
+                    'social_class' => 'icon-tumblr',
+                    'field_name' => 'tumblr',
+                    'background' => '#314358',
+                    'bg_default' => '#314358',
+                    'icon_color' => '#FFFFFF',
+                    'url' => '',
+                    'enabled' => '0',
+                    'nr' => '11'
+                )
+            );
+
+            Db::getInstance()->insert(
+                'social_media_sidebar',
+                array(
+                    'social_name' => 'WordPress',
+                    'social_class' => 'icon-wordpress',
+                    'field_name' => 'wordpress',
+                    'background' => '#FFFFFF',
+                    'bg_default' => '#FFFFFF',
+                    'icon_color' => '#000000',
+                    'url' => '',
+                    'enabled' => '0',
+                    'nr' => '12'
+                )
+            );
+
+            Db::getInstance()->insert(
+                'social_media_sidebar',
+                array(
+                    'social_name' => 'Spotify',
+                    'social_class' => 'icon-spotify',
+                    'field_name' => 'spotify',
+                    'background' => '#000000',
+                    'bg_default' => '#000000',
+                    'icon_color' => '#23CF5F',
+                    'url' => '',
+                    'enabled' => '0',
+                    'nr' => '13'
+                )
+            );
+
+            Db::getInstance()->insert(
+                'social_media_sidebar',
+                array(
+                    'social_name' => 'Soundcloud',
+                    'social_class' => 'icon-soundcloud',
+                    'field_name' => 'soundcloud',
+                    'background' => '#FF5510',
+                    'bg_default' => '#FF5510',
+                    'icon_color' => '#FFFFFF',
+                    'url' => '',
+                    'enabled' => '0',
+                    'nr' => '14'
+                )
+            );
         }
         return true;
     }
@@ -297,6 +387,7 @@ class SocialmediaSidebar extends Module
         if (Tools::isSubmit('saveStyleMisc')) {
             Configuration::updateValue('PC_SOCIAL_NEW_WINDOW', Tools::getValue('PC_SOCIAL_NEW_WINDOW'));
             Configuration::updateValue('PC_SOCIAL_INVERSE', Tools::getValue('PC_SOCIAL_INVERSE'));
+            Configuration::updateValue('PC_HIDE_MOBILE', Tools::getValue('PC_HIDE_MOBILE'));
         }
     }
 
@@ -307,7 +398,11 @@ class SocialmediaSidebar extends Module
             <!-- Nav tabs -->
             <ul class="nav nav-tabs nav-tabs-sticky" role="tablist">
                 <li role="presentation" class="active"><a href="#settings" aria-controls="home" role="tab" 
-                data-toggle="tab"><i class="icon-cogs"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Settings').'</a></li>
+                data-toggle="tab"><i class="icon-power-off"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Enable/Disable social media').'</a></li>
+                <li role="presentation"><a href="#colors" aria-controls="colors" role="tab" data-toggle="tab">
+                <i class="icon-cogs"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Settings').'</a></li>
+                <li role="presentation"><a href="#version" aria-controls="version" role="tab" data-toggle="tab">
+                <i class="icon-refresh"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Version checker').'</a></li>
                 <li role="presentation"><a href="#about" aria-controls="profile" role="tab" data-toggle="tab">
                 <i class="icon-info-circle"></i>&nbsp;&nbsp;&nbsp;'.$this->l('About').'</a></li>
             </ul>
@@ -416,13 +511,20 @@ class="btn btn-default btn-lg">
         value="'.$this->l('Enable').'" class="btn btn-default btn-lg">
         </form>';
         }
-
-        $footer .= ''.$this->renderCustomizeStyle().'
+        $data = file_get_contents('http://prestacraft.com/free-modules/version_checker.php?module='.$this->name.'&version='.$this->version.'');
+        $footer .= '
+        </div>
+        <div role="tabpanel" class="tab-pane panel" id="colors">
+        '.$this->renderCustomizeStyle().'
         '.$this->renderCustomizeStyleMisc().'
         </div>
+        <div role="tabpanel" class="tab-pane panel" id="version">
+                <h3>'.$this->l('Version checker').'</h3>
+        '.$data.'
+        </div>
         <div role="tabpanel" class="tab-pane panel" id="about">
-   '.$this->l('Icons are part of Font Awesome Icons').' - <a href="http://fortawesome.github.io/Font-Awesome/" 
-   target="_blank">http://fortawesome.github.io/Font-Awesome/</a>
+   '.$this->l('Icons are part of Font Awesome Icons').' - <a href="https://fontawesome.com/" 
+   target="_blank">https://fontawesome.com/</a>
         <br /><br />
         '.$this->l('Have a look at my blog with tutorials and modules for PrestaShop').' -
         <a href="http://prestacraft.com" target="_blank">http://prestacraft.com</a>. '.$this->l('Thanks').'.
@@ -643,6 +745,26 @@ class="btn btn-default btn-lg">
                             )
                         ),
                     ),
+
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Hide icons on mobile devices?'),
+                        'name' => 'PC_HIDE_MOBILE',
+                        'is_bool' => true,
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+
                 ),
             ),
 
@@ -679,6 +801,7 @@ class="btn btn-default btn-lg">
 
         $fields['PC_SOCIAL_NEW_WINDOW'] = Configuration::get('PC_SOCIAL_NEW_WINDOW');
         $fields['PC_SOCIAL_INVERSE'] = Configuration::get('PC_SOCIAL_INVERSE');
+        $fields['PC_HIDE_MOBILE'] = Configuration::get('PC_HIDE_MOBILE');
 
         return $fields;
     }
@@ -690,12 +813,18 @@ class="btn btn-default btn-lg">
         $this->context->controller->addCSS($this->_path.'views/css/pc_sidebar.css', 'all');
         $this->context->controller->addCSS($this->_path.'views/css/font-awesome.css', 'all');
 
+        $hideMobileCSS = '';
+        if (Configuration::get('PC_HIDE_MOBILE') == 1) {
+            $hideMobileCSS = '@media(max-width:768px) { .pc-social-sidebar { display: none; } }';
+        }
+
         if (Configuration::get('PC_SOCIAL_INVERSE') == 1) {
             if (Configuration::get('PC_SOCIAL_MONOCOLORED') == 1) {
+
                 return '<style>
+                '.$hideMobileCSS.'
                 .pc-social-icon {
                 transition-duration:0.6s;
-
                 }
                 .pc-social-icon:hover {
                 background-color:'.Configuration::get('PC_SOCIAL_MONOCOLORED_1').' !important;
@@ -707,6 +836,7 @@ class="btn btn-default btn-lg">
                 WHERE enabled=1 ORDER BY nr ASC');
 
                 $return = '<style>
+ '.$hideMobileCSS.'
 .pc-social-icon {
 transition-duration:0.6s;
 }';
