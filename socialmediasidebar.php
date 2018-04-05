@@ -21,7 +21,7 @@ class SocialmediaSidebar extends Module
     {
         $this->name = 'socialmediasidebar';
         $this->tab = 'front_office_features';
-        $this->version = '1.2.0';
+        $this->version = '1.3.0';
         $this->author = 'PrestaCraft';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -52,7 +52,9 @@ class SocialmediaSidebar extends Module
             !Configuration::updateValue('PC_SOCIAL_MONOCOLORED_2', '#F1F1F1') ||
             !Configuration::updateValue('PC_SOCIAL_INVERSE', '0') ||
             !Configuration::updateValue('PC_SOCIAL_NEW_WINDOW', '1') ||
-            !Configuration::updateValue('PC_HIDE_MOBILE', '0')
+            !Configuration::updateValue('PC_HIDE_MOBILE', '0') ||
+            !Configuration::updateValue('PC_MOBILE_BREAKPOINT', '768') ||
+            !Configuration::updateValue('PC_MOBILE_BOTTOM', '1')
         ) {
             return false;
         }
@@ -80,9 +82,14 @@ class SocialmediaSidebar extends Module
         }
 
         $count = Db::getInstance()->getValue('SELECT count(*) FROM `' . _DB_PREFIX_ . 'social_media_sidebar`');
+        $result = Db::getInstance()->executeS('SHOW COLUMNS FROM `' . _DB_PREFIX_ . 'social_media_sidebar` LIKE "hide_mobile"');
+        if (count($result) == 0) {
+            Db::getInstance()->execute('ALTER TABLE `' . _DB_PREFIX_ . 'social_media_sidebar` 
+            ADD COLUMN hide_mobile TINYINT default 0');
+        }
 
         // Dummy check if table has already some rows
-        if ($count < 12) {
+        if ($count < 15) {
             if (!Db::getInstance()->execute('TRUNCATE TABLE `' . _DB_PREFIX_ . 'social_media_sidebar`')) {
                 return false;
             }
@@ -240,21 +247,6 @@ class SocialmediaSidebar extends Module
             Db::getInstance()->insert(
                 'social_media_sidebar',
                 array(
-                    'social_name' => 'Tumblr',
-                    'social_class' => 'icon-tumblr',
-                    'field_name' => 'tumblr',
-                    'background' => '#314358',
-                    'bg_default' => '#314358',
-                    'icon_color' => '#FFFFFF',
-                    'url' => '',
-                    'enabled' => '0',
-                    'nr' => '11'
-                )
-            );
-
-            Db::getInstance()->insert(
-                'social_media_sidebar',
-                array(
                     'social_name' => 'WordPress',
                     'social_class' => 'icon-wordpress',
                     'field_name' => 'wordpress',
@@ -263,7 +255,7 @@ class SocialmediaSidebar extends Module
                     'icon_color' => '#000000',
                     'url' => '',
                     'enabled' => '0',
-                    'nr' => '12'
+                    'nr' => '11'
                 )
             );
 
@@ -278,7 +270,7 @@ class SocialmediaSidebar extends Module
                     'icon_color' => '#23CF5F',
                     'url' => '',
                     'enabled' => '0',
-                    'nr' => '13'
+                    'nr' => '12'
                 )
             );
 
@@ -293,7 +285,36 @@ class SocialmediaSidebar extends Module
                     'icon_color' => '#FFFFFF',
                     'url' => '',
                     'enabled' => '0',
+                    'nr' => '13'
+                )
+            );
+
+            Db::getInstance()->insert(
+                'social_media_sidebar',
+                array(
+                    'social_name' => 'Whatsapp',
+                    'social_class' => 'icon-whatsapp',
+                    'field_name' => 'whatsapp',
+                    'background' => '#2BB240',
+                    'bg_default' => '#2BB240',
+                    'icon_color' => '#FFFFFF',
+                    'url' => '',
+                    'enabled' => '0',
                     'nr' => '14'
+                )
+            );
+            Db::getInstance()->insert(
+                'social_media_sidebar',
+                array(
+                    'social_name' => 'LinkedIn',
+                    'social_class' => 'icon-linkedin',
+                    'field_name' => 'linkedin',
+                    'background' => '#0274B3',
+                    'bg_default' => '#0274B3',
+                    'icon_color' => '#FFFFFF',
+                    'url' => '',
+                    'enabled' => '0',
+                    'nr' => '15'
                 )
             );
         }
@@ -323,9 +344,32 @@ class SocialmediaSidebar extends Module
 
         <script type="text/javascript">
         $( document ).ready(function() {
-            $(".color").colorPicker();
+            $(".color").colorPicker({renderCallback: function($elm, toggled) {
+        $elm.val(\'#\' + this.color.colors.HEX);
+        var id = $elm.attr(\'id\');
+
+        if(id == "bgc") {
+            if ($elm.text) {
+            $(".icon-preview").css("background-color", $elm.text);
+          }
+        }
+          if(id == "ic") {
+             if ($elm.text) {
+           $(".icon-preview").css("color", $elm.text);
+          }
+        } 
+    }});
             $(".cp-alpha").hide();
+            
+            $(".bgc").keyup(function() {
+                $(".icon-preview").css("background-color", $(this).val());
             });
+            
+            $("#codename").keyup(function() {
+                $("#prev-icon").removeClass();
+                $("#prev-icon").addClass("icon-" + $(this).val());
+             });
+        });
         </script>';
 
         return $script.$this->postProcess().$this->displayTabs();
@@ -342,6 +386,7 @@ class SocialmediaSidebar extends Module
             $url = 'url__';
             $color = 'color__';
             $iconcolor = 'iconcolor__';
+            $hidemobile = 'hide_mobile__';
 
             foreach ($sql as $field) {
                 if (isset($_POST[$enable.$field['id']])) {
@@ -349,6 +394,15 @@ class SocialmediaSidebar extends Module
                         'social_media_sidebar',
                         array(
                             'enabled' => '1'),
+                        'id='.$field['id'].''
+                    );
+                }
+
+                if (isset($_POST[$hidemobile.$field['id']])) {
+                    Db::getInstance()->update(
+                        'social_media_sidebar',
+                        array(
+                            'hide_mobile' => '1'),
                         'id='.$field['id'].''
                     );
                 }
@@ -376,7 +430,6 @@ class SocialmediaSidebar extends Module
             }
         }
 
-
         if (Tools::isSubmit('saveStyle')) {
             Configuration::updateValue('PC_SOCIAL_MONOCOLORED', Tools::getValue('PC_SOCIAL_MONOCOLORED'));
             Configuration::updateValue('PC_SOCIAL_MONOCOLORED_1', Tools::getValue('PC_SOCIAL_MONOCOLORED_1'));
@@ -388,6 +441,30 @@ class SocialmediaSidebar extends Module
             Configuration::updateValue('PC_SOCIAL_NEW_WINDOW', Tools::getValue('PC_SOCIAL_NEW_WINDOW'));
             Configuration::updateValue('PC_SOCIAL_INVERSE', Tools::getValue('PC_SOCIAL_INVERSE'));
             Configuration::updateValue('PC_HIDE_MOBILE', Tools::getValue('PC_HIDE_MOBILE'));
+            Configuration::updateValue('PC_MOBILE_BREAKPOINT', Tools::getValue('PC_MOBILE_BREAKPOINT'));
+            Configuration::updateValue('PC_MOBILE_BOTTOM', Tools::getValue('PC_MOBILE_BOTTOM'));
+        }
+
+        if (Tools::getValue('addicon')) {
+            $max = Db::getInstance()->getValue(
+                'SELECT max(nr) 
+                FROM '._DB_PREFIX_.'social_media_sidebar'
+            );
+
+            Db::getInstance()->insert(
+                'social_media_sidebar',
+                array(
+                    'social_name' => Tools::getValue("icon_name"),
+                    'social_class' => 'icon-'.Tools::getValue("icon_codename").'',
+                    'field_name' => Tools::getValue("codename"),
+                    'background' => Tools::getValue("icon_bgc"),
+                    'bg_default' => Tools::getValue("icon_bgc"),
+                    'icon_color' => Tools::getValue("icon_ic"),
+                    'url' => '',
+                    'enabled' => '0',
+                    'nr' => (int)$max+1
+                )
+            );
         }
     }
 
@@ -398,9 +475,11 @@ class SocialmediaSidebar extends Module
             <!-- Nav tabs -->
             <ul class="nav nav-tabs nav-tabs-sticky" role="tablist">
                 <li role="presentation" class="active"><a href="#settings" aria-controls="home" role="tab" 
-                data-toggle="tab"><i class="icon-power-off"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Enable/Disable social media').'</a></li>
+                data-toggle="tab"><i class="icon-power-off"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Enable/Disable').'</a></li>
                 <li role="presentation"><a href="#colors" aria-controls="colors" role="tab" data-toggle="tab">
                 <i class="icon-cogs"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Settings').'</a></li>
+                <li role="presentation"><a href="#add" aria-controls="add" role="tab" data-toggle="tab">
+                <i class="icon-plus"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Add your icon').'</a></li>
                 <li role="presentation"><a href="#version" aria-controls="version" role="tab" data-toggle="tab">
                 <i class="icon-refresh"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Version checker').'</a></li>
                 <li role="presentation"><a href="#about" aria-controls="profile" role="tab" data-toggle="tab">
@@ -410,7 +489,7 @@ class SocialmediaSidebar extends Module
         <!-- Tab panes -->
         <div class="tab-content">
         <div role="tabpanel" class="tab-pane panel active" id="settings">
-        <h2 style="margin-top:20px;margin-left:30px;">'.$this->l('Enabled social medias').'</h2>
+        <h2 style="margin-top:20px;margin-left:30px;">'.$this->l('Enabled icons').'</h2>
         <p style="margin-left:30px;">'.$this->l('Visible in Your shop').'</p>
         <form method="POST" action="index.php?controller=AdminModules&token='.Tools::getAdminTokenLite('AdminModules').
             '&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name.'">
@@ -424,6 +503,9 @@ class SocialmediaSidebar extends Module
             </td>
             <td style="text-align:right;">
                 <strong>'.$this->l('Display order').'</strong>
+            </td>
+            <td>
+                <strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$this->l('Hide on mobile?').'</strong>&nbsp;
             </td>
             <td style="text-align:right;">
                 <strong>'.$this->l('Disable?').'</strong>&nbsp;
@@ -471,7 +553,15 @@ class SocialmediaSidebar extends Module
                 }
             }
 
+            $checked = '';
+
+            if ($field["hide_mobile"] == 1)
+                $checked = 'checked';
+
             $table .= '</select></td> <td>
+                <input style="margin-left:60px;" name="hide_mobile__'.$field["id"].'" type="checkbox" '.$checked.'>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td>
                 <input style="margin-left:60px;" name="disable__'.$field["id"].'" type="checkbox">
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </td>
@@ -492,9 +582,8 @@ class="btn btn-default btn-lg">
                 .Tools::getAdminTokenLite('AdminModules').'&configure='.$this->name.'&tab_module='.
                 $this->tab.'&module_name='.$this->name.'">
         <hr style="margin-top:50px;"/>
-        <h2 style="margin-top:50px;margin-left:30px;">'.$this->l('Available social medias').'</h2>
-        <p style="margin-left:30px;">'.$this->l('Select some of them if You wish to display them in the social 
-        media sidebar').'</p>
+        <h2 style="margin-top:50px;margin-left:30px;">'.$this->l('Available icons').'</h2>
+        <p style="margin-left:30px;">'.$this->l('Select some of them if You wish to display them in the sidebar').'</p>
         <table style="margin-top:30px;margin-left:30px;">
         ';
 
@@ -518,8 +607,71 @@ class="btn btn-default btn-lg">
         '.$this->renderCustomizeStyle().'
         '.$this->renderCustomizeStyleMisc().'
         </div>
+        <div role="tabpanel" class="tab-pane panel" id="add">
+                <h3>'.$this->l('Add your icon').'</h3>
+                <div class="row">
+                    <div class="col-xs-12 col-md-6">
+                        <form method="POST" action="index.php?controller=AdminModules&configure=socialmediasidebar&token='.Tools::getValue("token").'">
+                        <input type="hidden" name="addicon" value="1">
+                              <table>
+                                <tr>
+                                    <td style="padding: 5px;">'.$this->l("FontAwesome icon codename (ex. envelope)").'
+                                    </td>
+                                    <td style="padding: 5px;"> <input id="codename" type="text" class="form-control" 
+                                    name="icon_codename">
+                                    </td>
+                               </tr>
+                                <tr>
+                                   <td style="padding: 5px;">'.$this->l("Your new icon name (ex. Mail)").'
+                                    </td>
+                                    <td style="padding: 5px;"> <input type="text" class="form-control" name="icon_name">
+                                    </td>
+                               </tr>
+                                <tr>
+                                   <td style="padding: 5px;">'.$this->l("Background color").'
+                                    </td>
+                                    <td style="padding: 5px;"> <input id="bgc" type="text" class="color form-control bgc" 
+                                    name="icon_bgc">
+                                    </td>
+                                   </tr>
+                                    <tr>
+                                   <td style="padding: 5px;">'.$this->l("Icon color").'
+                                    </td>
+                                    <td style="padding: 5px;"> <input name="icon_ic" type="text" id="ic"
+                                     class="color form-control ic">
+                                    </td>
+                                       </tr>
+                             
+                                </table>
+                                <button type="submit" class="btn btn-primary btn-lg" 
+                                style="margin-top: 15px;margin-bottom:30px;">
+                                '.$this->l("Add").'</button>
+                         </form>
+                    </div>
+                    <div class="col-xs-12 col-md-6">
+                            <div class="panel" >
+                            <h3>'.$this->l("Preview").'</h3>
+                            <p>'.$this->l("After you fill all the data, you should see your icon preview. 
+                            If you can not see anything 
+                            make sure that icon codename is right!").'</p>
+                            
+                            <div class="icon-preview" style=\'font-family:"Font Awesome";width:50px;height:50px;
+                            background:#000000; text-align: center;padding-top: 10px;color:#ffffff;\'>
+                            <i id="prev-icon" class="icon-envelope"></i>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+                <style>
+                .icon-preview [class^="icon-"] {
+                font-size: 30px !important;
+                }
+                </style>
+               
+        </div>
         <div role="tabpanel" class="tab-pane panel" id="version">
                 <h3>'.$this->l('Version checker').'</h3>
+                <p><strong>'.$this->l('Your version:').'</strong> '.$this->version.'</p>
         '.$data.'
         </div>
         <div role="tabpanel" class="tab-pane panel" id="about">
@@ -747,6 +899,14 @@ class="btn btn-default btn-lg">
                     ),
 
                     array(
+                        'type' => 'text',
+                        'label' => $this->l('Mobile devices width breakpoint'),
+                        'name' => 'PC_MOBILE_BREAKPOINT',
+                        'suffix' => 'px',
+                        'col' => 2
+                    ),
+
+                    array(
                         'type' => 'switch',
                         'label' => $this->l('Hide icons on mobile devices?'),
                         'name' => 'PC_HIDE_MOBILE',
@@ -764,6 +924,26 @@ class="btn btn-default btn-lg">
                             )
                         ),
                     ),
+
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Show bottom icon bar on mobile devices?'),
+                        'name' => 'PC_MOBILE_BOTTOM',
+                        'is_bool' => true,
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+
 
                 ),
             ),
@@ -802,6 +982,8 @@ class="btn btn-default btn-lg">
         $fields['PC_SOCIAL_NEW_WINDOW'] = Configuration::get('PC_SOCIAL_NEW_WINDOW');
         $fields['PC_SOCIAL_INVERSE'] = Configuration::get('PC_SOCIAL_INVERSE');
         $fields['PC_HIDE_MOBILE'] = Configuration::get('PC_HIDE_MOBILE');
+        $fields['PC_MOBILE_BREAKPOINT'] = Configuration::get('PC_MOBILE_BREAKPOINT');
+        $fields['PC_MOBILE_BOTTOM'] = Configuration::get('PC_MOBILE_BOTTOM');
 
         return $fields;
     }
@@ -812,57 +994,116 @@ class="btn btn-default btn-lg">
         $this->context->controller->addJS($this->_path.'views/js/pc_sidebar.js', 'all');
         $this->context->controller->addCSS($this->_path.'views/css/pc_sidebar.css', 'all');
         $this->context->controller->addCSS($this->_path.'views/css/font-awesome.css', 'all');
+    }
 
-        $hideMobileCSS = '';
+
+    public function hookDisplayFooter($params)
+    {
+        $style = '<style>';
+
+        $hideMobile = Db::getInstance()->executeS('SELECT id FROM '._DB_PREFIX_.'social_media_sidebar 
+        WHERE hide_mobile=1');
+
+
+        if (count($hideMobile) > 0) {
+            $style .= '@media(max-width:'.Configuration::get('PC_MOBILE_BREAKPOINT').'px) {';
+                foreach ($hideMobile as $item) {
+                    $style .= '.iconid' . $item["id"] . ' { display: none !important; } ';
+                }
+            $style .= '}';
+        }
+
+        $min = (int)Configuration::get('PC_MOBILE_BREAKPOINT')+1;
+
+        $style .= '
+				@media(min-width:'.$min.'px) { 
+					.pc-social-sidebar {
+						position:fixed;
+						left:0;
+						top:20%;
+						z-index:9999;
+						width:50px;
+					}
+				}';
+
         if (Configuration::get('PC_HIDE_MOBILE') == 1) {
-            $hideMobileCSS = '@media(max-width:768px) { .pc-social-sidebar { display: none; } }';
+            $style .= '@media(max-width:'.Configuration::get('PC_MOBILE_BREAKPOINT').'px) { .pc-social-sidebar { display: none; } }';
+        } else {
+            if (Configuration::get('PC_MOBILE_BOTTOM') == 1) {
+                $nbrMedia = Db::getInstance()->getValue('SELECT COUNT(*) FROM '._DB_PREFIX_.'social_media_sidebar 
+                WHERE enabled=1');
+                $nbrMedia = $nbrMedia-count($hideMobile);
+                $widthElement = 100/$nbrMedia-1.5;
+
+                $style .= ' @media(max-width:'.Configuration::get('PC_MOBILE_BREAKPOINT').'px) { 
+                 .pc-social-icon {
+                    height:50px;
+                    font-size:24px;
+                    text-align:center;
+                    padding-top:12px;
+                    display: inline-block;
+                    width: '.$widthElement.'% !important;
+                }
+                
+                .pc-social-sidebar {
+                    position:fixed;
+                    left:0;
+                    text-align: center;
+                    z-index:9999;
+                    width:100%;
+                    bottom: 0;
+                }
+                 }';
+            } else {
+                $style .= ' @media(max-width:'.Configuration::get('PC_MOBILE_BREAKPOINT').'px) { 
+                 .pc-social-sidebar {
+                     position:fixed;
+                    left:0;
+                    top:20%;
+                    z-index:9999;
+                    width:50px;
+                }';
+            }
         }
 
         if (Configuration::get('PC_SOCIAL_INVERSE') == 1) {
             if (Configuration::get('PC_SOCIAL_MONOCOLORED') == 1) {
 
-                return '<style>
-                '.$hideMobileCSS.'
-                .pc-social-icon {
-                transition-duration:0.6s;
-                }
+                $style .= '
                 .pc-social-icon:hover {
                 background-color:'.Configuration::get('PC_SOCIAL_MONOCOLORED_1').' !important;
                 color:'.Configuration::get('PC_SOCIAL_MONOCOLORED_2').' !important;
                 }
-                </style>';
+             ';
             } else {
                 $sql = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . 'social_media_sidebar` 
                 WHERE enabled=1 ORDER BY nr ASC');
 
-                $return = '<style>
- '.$hideMobileCSS.'
+                $style .= '<style>
 .pc-social-icon {
 transition-duration:0.6s;
 }';
                 foreach ($sql as $social) {
-                    $return .= '
+                    $style .= '
 .iconid'.$social["id"].':hover {
 background-color:'.$social["icon_color"].' !important;
 color:'.$social["background"].' !important;
                     }';
                 }
 
-                $return .='</style>';
-
-                return $return;
             }
         }
-    }
 
+        $style .= '</style>';
 
-    public function hookDisplayFooter($params)
-    {
         $sql = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . 'social_media_sidebar`
          WHERE enabled=1 ORDER BY nr ASC');
-        $assign = array('socialmedias' => $sql);
+        $assign = array(
+            'socialmedias' => $sql
+        );
+
         $this->context->smarty->assign($assign);
 
-        return $this->display(__FILE__, 'socialmediasidebar.tpl');
+        return $style.$this->display(__FILE__, 'socialmediasidebar.tpl');
     }
 }

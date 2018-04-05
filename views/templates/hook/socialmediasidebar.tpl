@@ -11,6 +11,10 @@
  *
 *}
 
+{if $version != "1.6"}
+    <script type="text/javascript" src="{$jq}"></script>
+{/if}
+
 <div class="pc-social-sidebar">
     {foreach from=$socialmedias item=social}
         <a href="{$social.url}"

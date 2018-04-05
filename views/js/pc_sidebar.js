@@ -10,11 +10,16 @@
  */
 
 $(function() {
+
     $( ".pc-social-icon" ).mouseenter(function() {
-        $(this).animate({ width: "62"}, "fast");
+        if($(this).closest(".pc-social-sidebar").position().top < 200) {
+            $(this).animate({ width: "62"}, "fast");
+        }
     });
 
     $( ".pc-social-icon" ).mouseleave(function() {
-        $(this).animate({ width: "50"}, "fast");
+        if($(this).closest(".pc-social-sidebar").position().top < 200) {
+            $(this).animate({ width: "50"}, "fast");
+        }
     });
 });
