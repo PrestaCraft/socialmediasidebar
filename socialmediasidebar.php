@@ -21,7 +21,7 @@ class SocialmediaSidebar extends Module
     {
         $this->name = 'socialmediasidebar';
         $this->tab = 'front_office_features';
-        $this->version = '1.3.0';
+        $this->version = '1.3.1';
         $this->author = 'PrestaCraft';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -32,7 +32,8 @@ class SocialmediaSidebar extends Module
         $this->displayName = $this->l('Social media sidebar');
         $this->description = $this->l('Display fixed sidebar with social media buttons.');
 
-        $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
+        $this->confirmUninstall = $this->l('Are you sure you want to uninstall? You will lose your all custom social 
+        medias and settings.');
     }
 
 
@@ -76,23 +77,11 @@ class SocialmediaSidebar extends Module
             `url` VARCHAR(300),
             `enabled` INT,
             `nr` INT,
+            hide_mobile TINYINT,
             PRIMARY KEY (`id`)
         ) AUTO_INCREMENT = 1 ENGINE = ' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8')) {
             return false;
         }
-
-        $count = Db::getInstance()->getValue('SELECT count(*) FROM `' . _DB_PREFIX_ . 'social_media_sidebar`');
-        $result = Db::getInstance()->executeS('SHOW COLUMNS FROM `' . _DB_PREFIX_ . 'social_media_sidebar` LIKE "hide_mobile"');
-        if (count($result) == 0) {
-            Db::getInstance()->execute('ALTER TABLE `' . _DB_PREFIX_ . 'social_media_sidebar` 
-            ADD COLUMN hide_mobile TINYINT default 0');
-        }
-
-        // Dummy check if table has already some rows
-        if ($count < 15) {
-            if (!Db::getInstance()->execute('TRUNCATE TABLE `' . _DB_PREFIX_ . 'social_media_sidebar`')) {
-                return false;
-            }
 
             // Fixtures
             Db::getInstance()->insert(
@@ -317,13 +306,14 @@ class SocialmediaSidebar extends Module
                     'nr' => '15'
                 )
             );
-        }
         return true;
     }
 
 
     public function uninstall()
     {
+        Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'social_media_sidebar`');
+
         if (!parent::uninstall()) {
             return false;
         }
@@ -382,6 +372,7 @@ class SocialmediaSidebar extends Module
             $sql = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . 'social_media_sidebar`');
             $enable = 'enable__';
             $disable = 'disable__';
+            $remove = 'remove__';
             $nr = 'nr__';
             $url = 'url__';
             $color = 'color__';
@@ -389,6 +380,13 @@ class SocialmediaSidebar extends Module
             $hidemobile = 'hide_mobile__';
 
             foreach ($sql as $field) {
+                if (isset($_POST[$remove.$field['id']])) {
+                    Db::getInstance()->execute(
+                        'DELETE FROM '._DB_PREFIX_.'social_media_sidebar 
+                        WHERE id='.(int)$field['id'].''
+                    );
+                }
+
                 if (isset($_POST[$enable.$field['id']])) {
                     Db::getInstance()->update(
                         'social_media_sidebar',
@@ -476,6 +474,8 @@ class SocialmediaSidebar extends Module
             <ul class="nav nav-tabs nav-tabs-sticky" role="tablist">
                 <li role="presentation" class="active"><a href="#settings" aria-controls="home" role="tab" 
                 data-toggle="tab"><i class="icon-power-off"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Enable/Disable').'</a></li>
+                <li role="presentation"><a href="#remove" aria-controls="remove" role="tab" 
+                data-toggle="tab"><i class="icon-remove"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Remove icons').'</a></li>
                 <li role="presentation"><a href="#colors" aria-controls="colors" role="tab" data-toggle="tab">
                 <i class="icon-cogs"></i>&nbsp;&nbsp;&nbsp;'.$this->l('Settings').'</a></li>
                 <li role="presentation"><a href="#add" aria-controls="add" role="tab" data-toggle="tab">
@@ -571,6 +571,8 @@ class SocialmediaSidebar extends Module
         $disabledSQL = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . 'social_media_sidebar`
         WHERE enabled=0 ORDER BY social_name ASC');
 
+        $allSQL = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . 'social_media_sidebar` ORDER BY social_name ASC');
+
         $footer = '</table>
 
 <input style="margin-top:30px;margin-left:30px;margin-bottom:60px;" type="submit"  value="'.$this->l('Save').'" 
@@ -603,6 +605,28 @@ class="btn btn-default btn-lg">
         $data = file_get_contents('http://prestacraft.com/free-modules/version_checker.php?module='.$this->name.'&version='.$this->version.'');
         $footer .= '
         </div>
+        <div role="tabpanel" class="tab-pane panel" id="remove">';
+
+        $footer .= '<h2 style="margin-top:50px;margin-left:30px;">'.$this->l('Remove icons').'</h2>
+        <form method="POST" action="index.php?controller=AdminModules&token='
+            .Tools::getAdminTokenLite('AdminModules').'&configure='.$this->name.'&tab_module='.
+            $this->tab.'&module_name='.$this->name.'">
+        <table style="margin-top:30px;margin-left:30px;">
+        ';
+            foreach ($allSQL as $field) {
+            $footer .= '<tr><td><input type="checkbox" name="remove__'.$field["id"].'" value="'.$field["id"].'">
+                &nbsp;&nbsp;</td>
+            <td style="text-align:right;"><i class="'.$field["social_class"].'"></i></td> 
+            <td>&nbsp;&nbsp;'.$field["social_name"].'</td></tr>';
+            }
+
+            $footer .= '
+        </table>
+        <input style="margin-top:30px;margin-left:30px;margin-bottom:60px;" type="submit" 
+        value="'.$this->l('Remove').'" class="btn btn-default btn-lg">
+        </form>';
+
+        $footer .= '</div>
         <div role="tabpanel" class="tab-pane panel" id="colors">
         '.$this->renderCustomizeStyle().'
         '.$this->renderCustomizeStyleMisc().'
@@ -657,7 +681,7 @@ class="btn btn-default btn-lg">
                             
                             <div class="icon-preview" style=\'font-family:"Font Awesome";width:50px;height:50px;
                             background:#000000; text-align: center;padding-top: 10px;color:#ffffff;\'>
-                            <i id="prev-icon" class="icon-envelope"></i>
+                            <i id="prev-icon" class=""></i>
                             </div>
                             </div>
                     </div>
