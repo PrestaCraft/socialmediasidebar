@@ -66,6 +66,8 @@ class SocialmediaSidebar extends Module
 
     public function installDb()
     {
+        Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'social_media_sidebar`');
+
         if (!Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'social_media_sidebar` (
             `id` INT( 11 ) UNSIGNED NOT NULL AUTO_INCREMENT ,
             `social_name` VARCHAR(30),
@@ -312,8 +314,6 @@ class SocialmediaSidebar extends Module
 
     public function uninstall()
     {
-        Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'social_media_sidebar`');
-
         if (!parent::uninstall()) {
             return false;
         }
