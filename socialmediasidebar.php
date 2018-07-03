@@ -602,7 +602,7 @@ class="btn btn-default btn-lg">
         value="'.$this->l('Enable').'" class="btn btn-default btn-lg">
         </form>';
         }
-        $data = file_get_contents('http://prestacraft.com/free-modules/version_checker.php?module='.$this->name.'&version='.$this->version.'');
+        $data = file_get_contents('http://prestacraft.com/version_checker.php?module='.$this->name.'&version='.$this->version.'');
         $footer .= '
         </div>
         <div role="tabpanel" class="tab-pane panel" id="remove">';
