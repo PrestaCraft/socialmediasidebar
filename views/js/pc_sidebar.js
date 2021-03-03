@@ -10,16 +10,28 @@
  */
 
 $(function() {
-
     $( ".pc-social-icon" ).mouseenter(function() {
-        if($(this).closest(".pc-social-sidebar").position().top < 200) {
-            $(this).animate({ width: "62"}, "fast");
+        if (typeof pc_total_wider !== 'undefined' && typeof pc_icon_box_size !== 'undefined') {
+            if($(this).closest(".pc-social-sidebar").position().top < 200) {
+                if (pc_sidebar_position == 'left') {
+                    $(this).animate({ width: pc_total_wider}, "fast");
+                } else {
+                    $(this).css('width', pc_total_wider);
+                    $(this).animate({ marginLeft: '-' + pc_wider + 'px'}, "fast");
+                }
+            }
         }
     });
 
     $( ".pc-social-icon" ).mouseleave(function() {
-        if($(this).closest(".pc-social-sidebar").position().top < 200) {
-            $(this).animate({ width: "50"}, "fast");
+        if (typeof pc_total_wider !== 'undefined' && typeof pc_icon_box_size !== 'undefined') {
+            if ($(this).closest(".pc-social-sidebar").position().top < 200) {
+                if (pc_sidebar_position == 'left') {
+                    $(this).animate({width: pc_icon_box_size}, "fast");
+                } else {
+                    $(this).animate({marginLeft: '0'}, "fast");
+                }
+            }
         }
     });
 });
