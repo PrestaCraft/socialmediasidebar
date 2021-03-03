@@ -1,3 +1,14 @@
+{*
+ * This software is provided "as is" without warranty of any kind.
+ *
+ * Made by PrestaCraft
+ *
+ * Visit my website (http://prestacraft.com) for future updates, new articles and other awesome modules.
+ *
+ * @author     PrestaCraft
+ * @copyright  PrestaCraft
+*}
+
 <style>
 {foreach from=$defined_icons item=icon}
     .isettings-container .iconid{$icon.id_social_media_sidebar} {

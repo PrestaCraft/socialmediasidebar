@@ -11,7 +11,7 @@
 
 <link rel="stylesheet" type="text/css" href="../modules/socialmediasidebar/views/css/back.css">
 <link rel="stylesheet" type="text/css" href="../modules/socialmediasidebar/views/css/font-awesome.css">
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="../modules/socialmediasidebar/views/js/jqui.js"></script>
 <script src="../modules/socialmediasidebar/views/js/jqColorPicker.min.js"></script>
 
 {literal}

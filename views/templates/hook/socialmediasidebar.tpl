@@ -1,5 +1,4 @@
 {*
- *
  * This software is provided "as is" without warranty of any kind.
  *
  * Made by PrestaCraft
@@ -8,7 +7,6 @@
  *
  * @author     PrestaCraft
  * @copyright  PrestaCraft
- *
 *}
 
 <style>

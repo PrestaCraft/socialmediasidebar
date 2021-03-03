@@ -1,3 +1,14 @@
+{*
+ * This software is provided "as is" without warranty of any kind.
+ *
+ * Made by PrestaCraft
+ *
+ * Visit my website (http://prestacraft.com) for future updates, new articles and other awesome modules.
+ *
+ * @author     PrestaCraft
+ * @copyright  PrestaCraft
+*}
+
 <div class="panel">
     <div class="alert alert-warning">
         {l s='In order to use this module you need to be in single shop context.' mod='socialmediasidebar'}
