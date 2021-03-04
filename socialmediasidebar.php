@@ -638,6 +638,22 @@ class SocialmediaSidebar extends Module
 
     public function hookDisplayFooter($params)
     {
+        $cacheEnabled = (bool)Configuration::get('PC_ENABLE_CACHE');
+
+        if ($cacheEnabled) {
+            if (!$this->isCached('socialmediasidebar.tpl', $this->getCacheId($this->name))) {
+                $this->context->smarty->assign(self::getSmartyVariables());
+            }
+
+            return $this->display(__FILE__, 'socialmediasidebar.tpl', $this->getCacheId());
+        } else {
+            $this->context->smarty->assign(self::getSmartyVariables());
+            return $this->display(__FILE__, 'socialmediasidebar.tpl');
+        }
+    }
+
+    public static function getSmartyVariables()
+    {
         $icons = SocialMediaSidebarModel::getAll((int)Shop::getContextShopID(), true);
 
         $hideMobileSingle = false;
@@ -668,8 +684,6 @@ class SocialmediaSidebar extends Module
         $assign['pc_icon_box_size'] = (int)Configuration::get('PC_ICON_BOX_SIZE');
         $assign['calc_padding'] = ((int)Configuration::get('PC_ICON_BOX_SIZE')-(int)Configuration::get('PC_ICON_SIZE'))/2;
 
-        $this->context->smarty->assign($assign);
-
-        return $this->display(__FILE__, 'socialmediasidebar.tpl');
+        return $assign;
     }
 }
