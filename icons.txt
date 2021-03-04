@@ -6,7 +6,6 @@ fa-address-book
 fa-address-card
 fa-adjust
 [fab]fa-adn
-[fab]fa-adobe
 [fab]fa-adversal
 [fab]fa-affiliatetheme
 fa-air-freshener
@@ -314,8 +313,6 @@ fa-couch
 [fab]fa-creative-commons-pd-alt
 [fab]fa-creative-commons-remix
 [fab]fa-creative-commons-sa
-[fab]fa-creative-commons-sampling
-[fab]fa-creative-commons-sampling-plus
 [fab]fa-creative-commons-share
 [fab]fa-creative-commons-zero
 fa-credit-card
@@ -504,7 +501,6 @@ fa-font
 [fab]fa-font-awesome
 [fab]fa-font-awesome-alt
 [fab]fa-font-awesome-flag
-fa-font-awesome-logo-full
 [fab]fa-fonticons
 [fab]fa-fonticons-fi
 fa-football-ball
@@ -1240,7 +1236,6 @@ fa-tractor
 [fab]fa-trade-federation
 fa-trademark
 fa-traffic-light
-[fab]fa-trailer
 fa-train
 fa-tram
 fa-transgender
