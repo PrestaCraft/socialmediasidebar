@@ -478,7 +478,6 @@ fa-fire
 fa-fire-alt
 fa-fire-extinguisher
 [fab]fa-firefox
-[fab]fa-firefox-browser
 fa-first-aid
 [fab]fa-first-order
 [fab]fa-first-order-alt
@@ -666,7 +665,6 @@ fa-icons
 fa-id-badge
 fa-id-card
 fa-id-card-alt
-[fab]fa-ideal
 fa-igloo
 fa-image
 fa-images
@@ -797,7 +795,6 @@ fa-memory
 fa-menorah
 fa-mercury
 fa-meteor
-[fab]fa-microblog
 fa-microchip
 fa-microphone
 fa-microphone-alt
@@ -911,7 +908,6 @@ fa-photo-video
 [fab]fa-pied-piper-alt
 [fab]fa-pied-piper-hat
 [fab]fa-pied-piper-pp
-[fab]fa-pied-piper-square
 fa-piggy-bank
 fa-pills
 [fab]fa-pinterest
@@ -1272,7 +1268,6 @@ fa-underline
 fa-undo
 fa-undo-alt
 [fab]fa-uniregistry
-[fab]fa-unity
 fa-universal-access
 fa-university
 fa-unlink
